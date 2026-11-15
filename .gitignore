@@ -1,0 +1,104 @@
+
+# ==========================================
+# Python
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+wheels/
+*.egg-info/
+.eggs/
+
+# ==========================================
+# Virtual environments
+# ==========================================
+venv/
+.venv/
+env/
+ENV/
+.conda/
+conda-env/
+
+# ==========================================
+# Environment variables and secrets
+# ==========================================
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ==========================================
+# Flask and application logs
+# ==========================================
+instance/
+logs/
+*.log
+
+# ==========================================
+# User uploads and generated videos
+# ==========================================
+uploads/
+outputs/
+temp/
+tmp/
+*.tmp
+*.temp
+
+# ==========================================
+# AI model weights and checkpoints
+# ==========================================
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+*.onnx
+*.bin
+*.pb
+*.h5
+*.hdf5
+*.tflite
+
+# ==========================================
+# SadTalker - external dependency
+# Clone separately when setting up the project
+# ==========================================
+SadTalker/
+
+# ==========================================
+# Jupyter and experiment files
+# ==========================================
+.ipynb_checkpoints/
+*.ipynb
+
+# ==========================================
+# IDE and editor files
+# ==========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ==========================================
+# Windows and macOS
+# ==========================================
+Thumbs.db
+Desktop.ini
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ==========================================
+# Generated media and archives
+# ==========================================
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.zip
+*.7z
+*.rar

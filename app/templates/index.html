@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Lip Sync Studio</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #10131a;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 60px auto;
+            padding: 30px;
+        }
+
+        h1 { text-align: center; }
+
+        .subtitle {
+            text-align: center;
+            color: #aab0bd;
+            margin-bottom: 35px;
+        }
+
+        .panel {
+            background: #1b202b;
+            padding: 30px;
+            border-radius: 12px;
+        }
+
+        label {
+            display: block;
+            margin: 20px 0 10px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            background: #282f3d;
+            color: white;
+            border: 1px solid #41495a;
+            border-radius: 6px;
+        }
+
+        button, .download {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-top: 25px;
+            border: none;
+            border-radius: 6px;
+            background: #6c63ff;
+            color: white;
+            font-size: 16px;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        button:hover, .download:hover { background: #574ee8; }
+
+        .error {
+            background: #5b252c;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .video-result { margin-top: 30px; }
+
+        video {
+            width: 100%;
+            border-radius: 8px;
+            background: #000;
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <h1>AI Lip Sync Studio</h1>
+        <p class="subtitle">Make a photo speak using your voice.</p>
+
+        <section class="panel">
+
+            {% if error %}
+                <div class="error">{{ error }}</div>
+            {% endif %}
+
+            <form id="generationForm" enctype="multipart/form-data">
+                <label for="image">Upload a face image</label>
+                <input type="file" id="image" name="image" accept="image/jpeg,image/png" required>
+
+                <label for="audio">Upload your voice recording</label>
+                <input type="file" id="audio" name="audio" accept="audio/wav,audio/mpeg,audio/mp4" required>
+
+                <button type="submit">Generate Talking Video</button>
+            </form>
+
+            {% if video_url %}
+                <div class="video-result">
+                    <h2>Your video is ready!</h2>
+                    <video controls>
+                        <source src="{{ video_url }}" type="video/mp4">
+                        Your browser does not support video playback.
+                    </video>
+                    <a class="download" href="{{ video_url }}" download>Download MP4</a>
+                </div>
+            {% endif %}
+
+        </section>
+    </main>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
