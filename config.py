@@ -16,6 +16,6 @@ class Config:
     SADTALKER_CHECKPOINTS = SADTALKER_DIR / "checkpoints"
 
     VIDEO_SIZE = 256
-    VIDEO_PREPROCESS = "crop"
+    VIDEO_PREPROCESS = "full"
 
     GENERATION_TIMEOUT = 14400

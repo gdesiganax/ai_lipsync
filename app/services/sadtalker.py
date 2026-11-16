@@ -42,6 +42,7 @@ def run_generation(app, job_id, image_path, audio_path, output_dir):
             "--checkpoint_dir", str(config["SADTALKER_CHECKPOINTS"]),
             "--size", str(config["VIDEO_SIZE"]),
             "--preprocess", config["VIDEO_PREPROCESS"],
+            "--expression_scale", "1.3",
             "--cpu"
         ]
 
