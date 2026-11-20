@@ -1,0 +1,105 @@
+{#
+    Reusable UI components (presentation only).
+    Usage: {% from "partials/_components.html" import page_header, card, alert, dropzone, steps %}
+#}
+{% from "partials/_icons.html" import icon %}
+
+
+{# Page title block shown at the top of every page. #}
+{% macro page_header(title, description=None, eyebrow=None, pills=[]) -%}
+<header class="page-header">
+    <div class="page-header-text">
+        {% if eyebrow %}<p class="page-eyebrow">{{ eyebrow }}</p>{% endif %}
+        <h1 class="page-title">{{ title }}</h1>
+        {% if description %}<p class="page-description">{{ description }}</p>{% endif %}
+    </div>
+    {% if pills %}
+    <div class="page-header-meta">
+        {% for pill in pills %}
+        <span class="pill"><span class="pill-dot"></span>{{ pill }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+</header>
+{%- endmacro %}
+
+
+{# Surface card. Use with {% call card(...) %} body {% endcall %}. #}
+{% macro card(title=None, description=None, step=None, icon_name=None, id=None, cls="", tag="section") -%}
+<{{ tag }} class="card {{ cls }}"{% if id %} id="{{ id }}"{% endif %}>
+    {% if title %}
+    <header class="card-header">
+        {% if step %}
+        <span class="card-badge card-badge--step">{{ step }}</span>
+        {% elif icon_name %}
+        <span class="card-badge">{{ icon(icon_name, 16) }}</span>
+        {% endif %}
+        <div class="card-heading">
+            <h2 class="card-title">{{ title }}</h2>
+            {% if description %}<p class="card-description">{{ description }}</p>{% endif %}
+        </div>
+    </header>
+    {% endif %}
+    <div class="card-body">
+        {{ caller() }}
+    </div>
+</{{ tag }}>
+{%- endmacro %}
+
+
+{# Inline alert. type: error | info | success | warning #}
+{% macro alert(message, type="info", title=None) -%}
+<div class="alert alert--{{ type }}" role="{{ 'alert' if type == 'error' else 'status' }}">
+    <span class="alert-icon">{{ icon("alert" if type in ["error", "warning"] else ("check" if type == "success" else "info"), 18) }}</span>
+    <div class="alert-content">
+        {% if title %}<strong class="alert-title">{{ title }}</strong>{% endif %}
+        <span>{{ message }}</span>
+    </div>
+</div>
+{%- endmacro %}
+
+
+{#
+    File upload area.
+    input_mode:
+      "overlay" - transparent native input covers the zone (click + native drop,
+                  keeps browser `required` validation). Filename handled by ui.js.
+      "hidden"  - input is display:none; the page's own script drives it.
+    tag: "label" or "div" (use "div" when the page script triggers input.click()).
+#}
+{% macro dropzone(zone_id, input_id, accept, title, hint, formats=None, icon_name="upload", input_name=None, required=False, filename_id=None, filename_text=None, input_mode="hidden", tag="label") -%}
+<{{ tag }} class="dropzone{% if input_mode == 'overlay' %} dropzone--overlay{% endif %}" id="{{ zone_id }}"{% if input_mode == 'overlay' %} data-dropzone{% endif %}>
+    <input
+        type="file"
+        id="{{ input_id }}"
+        {% if input_name %}name="{{ input_name }}"{% endif %}
+        accept="{{ accept }}"
+        class="{{ 'dropzone-input' if input_mode == 'overlay' else 'dropzone-input-hidden' }}"
+        {% if required %}required{% endif %}
+    >
+    <span class="dropzone-icon">{{ icon(icon_name, 22) }}</span>
+    <span class="dropzone-title">{{ title }}</span>
+    <span class="dropzone-hint">{{ hint }}</span>
+    {% if formats %}<span class="dropzone-formats">{{ formats }}</span>{% endif %}
+    {% if filename_id or filename_text %}
+    <span class="dropzone-filename"{% if filename_id %} id="{{ filename_id }}"{% endif %} data-dropzone-filename>{{ filename_text }}</span>
+    {% endif %}
+    {% if caller %}{{ caller() }}{% endif %}
+</{{ tag }}>
+{%- endmacro %}
+
+
+{# Numbered "how it works" list. items: list of (title, text) pairs. #}
+{% macro steps(items) -%}
+<ol class="steps">
+    {% for step_title, step_text in items %}
+    <li class="step">
+        <span class="step-num">{{ "%02d"|format(loop.index) }}</span>
+        <div>
+            <h3 class="step-title">{{ step_title }}</h3>
+            <p class="step-text">{{ step_text }}</p>
+        </div>
+    </li>
+    {% endfor %}
+</ol>
+{%- endmacro %}

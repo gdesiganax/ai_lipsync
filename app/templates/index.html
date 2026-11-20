@@ -1,121 +1,110 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Lip Sync Studio</title>
-    <style>
-        * { box-sizing: border-box; }
+{% extends "base.html" %}
+{% from "partials/_components.html" import page_header, card, alert, dropzone, steps %}
+{% from "partials/_icons.html" import icon %}
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #10131a;
-            color: #fff;
-        }
+{% block title %}Lip Sync · AI Lip Sync Studio{% endblock %}
 
-        .container {
-            max-width: 900px;
-            margin: 60px auto;
-            padding: 30px;
-        }
+{% block content %}
 
-        h1 { text-align: center; }
+{{ page_header(
+    "Lip Sync",
+    "Make a photo speak using your voice. Upload a face image and a voice recording to generate a talking video.",
+    eyebrow="Video generation",
+    pills=["SadTalker"]
+) }}
 
-        .subtitle {
-            text-align: center;
-            color: #aab0bd;
-            margin-bottom: 35px;
-        }
+<div class="layout-split">
 
-        .panel {
-            background: #1b202b;
-            padding: 30px;
-            border-radius: 12px;
-        }
+    <div class="stack">
 
-        label {
-            display: block;
-            margin: 20px 0 10px;
-            font-weight: bold;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            background: #282f3d;
-            color: white;
-            border: 1px solid #41495a;
-            border-radius: 6px;
-        }
-
-        button, .download {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            margin-top: 25px;
-            border: none;
-            border-radius: 6px;
-            background: #6c63ff;
-            color: white;
-            font-size: 16px;
-            text-align: center;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        button:hover, .download:hover { background: #574ee8; }
-
-        .error {
-            background: #5b252c;
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-        }
-
-        .video-result { margin-top: 30px; }
-
-        video {
-            width: 100%;
-            border-radius: 8px;
-            background: #000;
-        }
-    </style>
-</head>
-<body>
-    <main class="container">
-        <h1>AI Lip Sync Studio</h1>
-        <p class="subtitle">Make a photo speak using your voice.</p>
-
-        <section class="panel">
+        {% call card(
+            title="Create a talking video",
+            description="Add a clear face image and the voice recording it should speak.",
+            icon_name="sparkles"
+        ) %}
 
             {% if error %}
-                <div class="error">{{ error }}</div>
+                {{ alert(error, "error") }}
             {% endif %}
 
             <form id="generationForm" enctype="multipart/form-data">
-                <label for="image">Upload a face image</label>
-                <input type="file" id="image" name="image" accept="image/jpeg,image/png" required>
 
-                <label for="audio">Upload your voice recording</label>
-                <input type="file" id="audio" name="audio" accept="audio/wav,audio/mpeg,audio/mp4" required>
+                <div class="upload-grid">
+                    {{ dropzone(
+                        zone_id="lipsyncImageZone",
+                        input_id="image",
+                        input_name="image",
+                        accept="image/jpeg,image/png",
+                        title="Upload a face image",
+                        hint="Drop a photo here or click to browse",
+                        formats="JPG · PNG",
+                        icon_name="user",
+                        filename_text="No image selected",
+                        required=True,
+                        input_mode="overlay"
+                    ) }}
 
-                <button type="submit">Generate Talking Video</button>
+                    {{ dropzone(
+                        zone_id="lipsyncAudioZone",
+                        input_id="audio",
+                        input_name="audio",
+                        accept="audio/wav,audio/mpeg,audio/mp4",
+                        title="Upload your voice recording",
+                        hint="Drop an audio file here or click to browse",
+                        formats="WAV · MP3 · M4A",
+                        icon_name="music",
+                        filename_text="No audio selected",
+                        required=True,
+                        input_mode="overlay"
+                    ) }}
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg btn-block btn-busy form-submit">Generate Talking Video</button>
             </form>
 
             {% if video_url %}
-                <div class="video-result">
-                    <h2>Your video is ready!</h2>
-                    <video controls>
+                <div class="result-block">
+                    <h2 class="result-title">Your video is ready!</h2>
+                    <video controls class="video-player">
                         <source src="{{ video_url }}" type="video/mp4">
                         Your browser does not support video playback.
                     </video>
-                    <a class="download" href="{{ video_url }}" download>Download MP4</a>
+                    <a class="btn btn-success btn-block download" href="{{ video_url }}" download>
+                        {{ icon("download", 18) }}
+                        Download MP4
+                    </a>
                 </div>
             {% endif %}
 
-        </section>
-    </main>
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-</body>
-</html>
+        {% endcall %}
+
+    </div>
+
+    <aside class="stack">
+
+        {% call card(title="How it works", icon_name="info") %}
+            {{ steps([
+                ("Upload a face image", "Choose a portrait photo with a clearly visible face."),
+                ("Add your voice", "Upload the recording you want the photo to speak."),
+                ("Generate", "SadTalker animates the face in sync with your audio."),
+                ("Preview and download", "Watch the result and save it as an MP4."),
+            ]) }}
+        {% endcall %}
+
+        {% call card(title="Tips for best results", icon_name="check") %}
+            <ul class="tip-list">
+                <li>{{ icon("check", 15) }}<span>Use a well-lit, front-facing portrait.</span></li>
+                <li>{{ icon("check", 15) }}<span>Keep audio clean with little background noise.</span></li>
+                <li>{{ icon("check", 15) }}<span>Keep this tab open while the video is generating.</span></li>
+            </ul>
+        {% endcall %}
+
+    </aside>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% endblock %}

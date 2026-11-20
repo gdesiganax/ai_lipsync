@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0a0c11">
+    <title>{% block title %}AI Lip Sync Studio{% endblock %}</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%237c6cff'/%3E%3Cpath d='M7 14v4M11 10v12M16 7v18M21 12v8M25 14v4' stroke='white' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E">
+
+    {# Restore the collapsed sidebar state before first paint to avoid a layout jump. #}
+    <script>
+        try {
+            if (localStorage.getItem("studio.sidebar") === "collapsed") {
+                document.documentElement.classList.add("sidebar-collapsed");
+            }
+        } catch (e) {}
+    </script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/studio.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+{% from "partials/_icons.html" import icon %}
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="app-shell">
+
+    {% include "partials/_sidebar.html" %}
+
+    <div class="sidebar-backdrop" data-sidebar-close hidden></div>
+
+    <div class="app-main">
+
+        <header class="mobile-topbar">
+            <button
+                type="button"
+                class="icon-btn"
+                data-sidebar-open
+                aria-controls="sidebar"
+                aria-expanded="false"
+                aria-label="Open navigation"
+            >
+                {{ icon("menu", 20) }}
+            </button>
+
+            <a href="{{ url_for('main.index') }}" class="brand brand--compact">
+                <span class="brand-logo">{{ icon("logo", 16) }}</span>
+                <span class="brand-name">AI Lip Sync Studio</span>
+            </a>
+        </header>
+
+        <main id="main" class="page" tabindex="-1">
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer class="app-footer">
+            AI Lip Sync Studio · Powered by modular AI engines
+        </footer>
+
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/ui.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
