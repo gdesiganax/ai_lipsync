@@ -1,3 +1,4 @@
+
 import logging
 from logging.handlers import RotatingFileHandler
 from time import perf_counter
@@ -5,6 +6,7 @@ from time import perf_counter
 from flask import Flask, request, g
 
 from config import Config
+
 
 
 def configure_logging(app):
@@ -41,11 +43,31 @@ def create_app(config_class=Config):
         app.config["UPLOAD_FOLDER"],
         app.config["OUTPUT_FOLDER"],
         app.config["LOG_FOLDER"],
+        app.config["ANIMATION_MODELS_DIR"],
     ]:
         directory.mkdir(parents=True, exist_ok=True)
 
     configure_logging(app)
 
+    # Initialize processing module registry
+
+    # Initialize processing modules and pipeline
+    from app.services.modules.loader import load_modules
+    from app.services.modules.pipeline import ProcessingPipeline
+
+    module_registry = load_modules(app.config)
+
+    app.extensions["processing_module_registry"] = module_registry
+    app.extensions["processing_pipeline"] = ProcessingPipeline(
+        module_registry
+    )
+
+    app.logger.info(
+        "Processing modules initialized: %s",
+        module_registry.count()
+    )
+
+   
     @app.before_request
     def log_request():
         g.request_start = perf_counter()
@@ -57,7 +79,10 @@ def create_app(config_class=Config):
 
     @app.after_request
     def log_response(response):
-        duration = perf_counter() - g.get("request_start", perf_counter())
+        duration = perf_counter() - g.get(
+            "request_start",
+            perf_counter()
+        )
 
         app.logger.info(
             "RESPONSE | %s %s | Status: %s | Duration: %.3fs",
@@ -70,9 +95,13 @@ def create_app(config_class=Config):
 
     from app.routes.main import main_bp
     from app.routes.generation import generation_bp
+    from app.routes.animation import animation_bp
+    from app.routes.image_studio import image_studio_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(generation_bp)
+    app.register_blueprint(animation_bp)
+    app.register_blueprint(image_studio_bp)
 
     app.logger.info("AI Lip Sync Studio initialized.")
 

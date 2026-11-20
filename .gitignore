@@ -102,3 +102,87 @@ Desktop.ini
 *.zip
 *.7z
 *.rar
+
+
+
+
+# =====================================
+# Python environments
+# =====================================
+venv/
+env/
+.venv/
+ENV/
+.conda/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# =====================================
+# Environment variables and secrets
+# =====================================
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# =====================================
+# AI model weights and checkpoints
+# =====================================
+**/checkpoints/
+**/weights/
+**/pretrained_models/
+**/models/
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+*.onnx
+*.engine
+
+# =====================================
+# Generated videos and audio
+# =====================================
+**/results/
+**/generated/
+**/outputs/
+**/temp/
+**/tmp/
+**/cache/
+*.log
+
+# =====================================
+# User uploads
+# =====================================
+**/uploads/*
+!**/uploads/.gitkeep
+
+# =====================================
+# Python and Jupyter cache
+# =====================================
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+.coverage
+htmlcov/
+
+# =====================================
+# IDE and operating system
+# =====================================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+
+# =====================================
+# Database and temporary files
+# =====================================
+*.sqlite
+*.sqlite3
+*.db
+*.tmp
+*.bak
+*.old

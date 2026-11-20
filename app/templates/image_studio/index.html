@@ -1,0 +1,848 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Processing Studio</title>
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --background: #f5f7fb;
+            --surface: #ffffff;
+            --text: #172033;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --success: #15803d;
+            --danger: #dc2626;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: var(--background);
+            color: var(--text);
+        }
+
+        header {
+            background: #111827;
+            color: white;
+            padding: 20px 5%;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        header p {
+            margin: 7px 0 0;
+            color: #cbd5e1;
+            font-size: 13px;
+        }
+
+        main {
+            max-width: 1150px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 22px;
+        }
+
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 22px;
+        }
+
+        .panel h2 {
+            font-size: 17px;
+            margin: 0 0 18px;
+        }
+
+        .muted {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 10px;
+            padding: 35px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .upload-area:hover,
+        .upload-area.dragover {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .upload-area strong {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .upload-area input {
+            display: none;
+        }
+
+        .image-preview {
+            display: none;
+            margin-top: 18px;
+            text-align: center;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 280px;
+            object-fit: contain;
+            border-radius: 8px;
+            background: #f1f5f9;
+        }
+
+        .image-info {
+            margin-top: 10px;
+            font-size: 12px;
+            color: var(--muted);
+            overflow-wrap: anywhere;
+        }
+
+        .module-card {
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 15px;
+            margin-bottom: 12px;
+        }
+
+        .module-heading {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .module-heading input {
+            width: 17px;
+            height: 17px;
+            accent-color: var(--primary);
+        }
+
+        .module-heading strong {
+            font-size: 14px;
+        }
+
+        .module-description {
+            margin: 8px 0 0 27px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .module-options {
+            display: none;
+            margin: 16px 0 0 27px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+        }
+
+        .field {
+            margin-bottom: 15px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 7px;
+        }
+
+        .field input,
+        .field select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            outline: 2px solid #bfdbfe;
+            border-color: var(--primary);
+        }
+
+        .field small {
+            display: block;
+            margin-top: 5px;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .field-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        button,
+        .download-button {
+            display: inline-block;
+            border: 0;
+            border-radius: 7px;
+            padding: 12px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .primary-button {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+        }
+
+        .primary-button:hover {
+            background: var(--primary-dark);
+        }
+
+        button:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
+        .download-button {
+            background: #15803d;
+            color: white;
+            margin-top: 15px;
+        }
+
+        .status-box {
+            display: none;
+            padding: 15px;
+            margin-top: 18px;
+            border-radius: 8px;
+            background: #eff6ff;
+            color: #1e40af;
+            font-size: 13px;
+        }
+
+        .status-box.error {
+            background: #fef2f2;
+            color: var(--danger);
+        }
+
+        .status-box.success {
+            background: #f0fdf4;
+            color: var(--success);
+        }
+
+        .progress-track {
+            height: 7px;
+            background: #dbeafe;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+
+        .progress-bar {
+            width: 0;
+            height: 100%;
+            background: var(--primary);
+            transition: width .3s;
+        }
+
+        .result-panel {
+            display: none;
+        }
+
+        .result-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+
+        .empty-state {
+            color: var(--muted);
+            text-align: center;
+            padding: 45px 15px;
+            font-size: 13px;
+        }
+
+        @media (max-width: 750px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            main {
+                margin-top: 20px;
+            }
+
+            .panel {
+                padding: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Image Processing Studio</h1>
+    <p>Upload, configure, process and download your images.</p>
+</header>
+
+<main>
+
+    <div class="layout">
+
+        <section>
+
+            <div class="panel">
+                <h2>1. Upload Image</h2>
+
+                <div class="upload-area" id="uploadArea">
+                    <strong>Choose an image or drag it here</strong>
+                    <span class="muted">PNG, JPG, JPEG or WEBP</span>
+                    <input
+                        type="file"
+                        id="imageInput"
+                        accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
+                    >
+                </div>
+
+                <div class="image-preview" id="imagePreview">
+                    <img id="sourceImage" alt="Selected image">
+                    <div class="image-info" id="imageInfo"></div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>2. Processing Modules</h2>
+                <p class="muted">
+                    Select the processing modules you want to run.
+                    Options will appear when a module is selected.
+                </p>
+
+                <div id="modulesContainer">
+                    <div class="empty-state">Loading available modules...</div>
+                </div>
+            </div>
+
+            <button class="primary-button" id="processButton" disabled>
+                Process Image
+            </button>
+
+            <div class="status-box" id="statusBox">
+                <div id="statusMessage"></div>
+                <div class="progress-track">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+            </div>
+
+        </section>
+
+        <section>
+
+            <div class="panel">
+                <h2>3. Output Preview</h2>
+
+                <div class="empty-state" id="emptyResult">
+                    Your processed image will appear here.
+                </div>
+
+                <div class="result-panel" id="resultPanel">
+                    <img
+                        id="resultImage"
+                        class="result-image"
+                        alt="Processed image"
+                    >
+
+                    <div id="resultInfo" class="image-info"></div>
+
+                    <a
+                        id="downloadButton"
+                        class="download-button"
+                        href="#"
+                    >
+                        Download Processed Image
+                    </a>
+                </div>
+            </div>
+
+        </section>
+
+    </div>
+
+</main>
+
+<script>
+    const API = "/image-studio/api";
+
+    const imageInput = document.getElementById("imageInput");
+    const uploadArea = document.getElementById("uploadArea");
+    const imagePreview = document.getElementById("imagePreview");
+    const sourceImage = document.getElementById("sourceImage");
+    const imageInfo = document.getElementById("imageInfo");
+
+    const modulesContainer = document.getElementById("modulesContainer");
+    const processButton = document.getElementById("processButton");
+
+    const statusBox = document.getElementById("statusBox");
+    const statusMessage = document.getElementById("statusMessage");
+    const progressBar = document.getElementById("progressBar");
+
+    const emptyResult = document.getElementById("emptyResult");
+    const resultPanel = document.getElementById("resultPanel");
+    const resultImage = document.getElementById("resultImage");
+    const resultInfo = document.getElementById("resultInfo");
+    const downloadButton = document.getElementById("downloadButton");
+
+    let selectedFile = null;
+    let availableModules = [];
+    let sourcePreviewUrl = null;
+    let pollingTimer = null;
+
+    function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, character => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#039;"
+        })[character]);
+    }
+
+    function showStatus(message, type = "info", progress = 0) {
+        statusBox.style.display = "block";
+        statusBox.className = "status-box";
+
+        if (type === "error") {
+            statusBox.classList.add("error");
+        }
+
+        if (type === "success") {
+            statusBox.classList.add("success");
+        }
+
+        statusMessage.textContent = message;
+        progressBar.style.width = `${Math.max(0, Math.min(100, progress))}%`;
+    }
+
+    function hideStatus() {
+        statusBox.style.display = "none";
+    }
+
+    function formatBytes(bytes) {
+        if (bytes < 1024) return `${bytes} bytes`;
+        if (bytes < 1024 * 1024) {
+            return `${(bytes / 1024).toFixed(1)} KB`;
+        }
+
+        return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+    }
+
+    function setImage(file) {
+        if (!file) return;
+
+        const allowedTypes = [
+            "image/png",
+            "image/jpeg",
+            "image/webp"
+        ];
+
+        if (!allowedTypes.includes(file.type)) {
+            alert("Please select a PNG, JPG or WEBP image.");
+            return;
+        }
+
+        selectedFile = file;
+
+        if (sourcePreviewUrl) {
+            URL.revokeObjectURL(sourcePreviewUrl);
+        }
+
+        sourcePreviewUrl = URL.createObjectURL(file);
+
+        sourceImage.src = sourcePreviewUrl;
+        imageInfo.textContent =
+            `${file.name} · ${formatBytes(file.size)}`;
+
+        imagePreview.style.display = "block";
+        processButton.disabled = false;
+
+        resultPanel.style.display = "none";
+        emptyResult.style.display = "block";
+        hideStatus();
+    }
+
+    uploadArea.addEventListener("click", () => {
+        imageInput.click();
+    });
+
+    imageInput.addEventListener("change", event => {
+        setImage(event.target.files[0]);
+    });
+
+    uploadArea.addEventListener("dragover", event => {
+        event.preventDefault();
+        uploadArea.classList.add("dragover");
+    });
+
+    uploadArea.addEventListener("dragleave", () => {
+        uploadArea.classList.remove("dragover");
+    });
+
+    uploadArea.addEventListener("drop", event => {
+        event.preventDefault();
+        uploadArea.classList.remove("dragover");
+
+        const file = event.dataTransfer.files[0];
+        setImage(file);
+    });
+
+    async function loadModules() {
+        try {
+            const response = await fetch(`${API}/modules`);
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || "Unable to load modules.");
+            }
+
+            availableModules = data.modules || [];
+            renderModules();
+
+        } catch (error) {
+            modulesContainer.innerHTML =
+                `<div class="empty-state">${escapeHtml(error.message)}</div>`;
+        }
+    }
+
+    function renderModules() {
+        modulesContainer.innerHTML = "";
+
+        if (!availableModules.length) {
+            modulesContainer.innerHTML =
+                '<div class="empty-state">No processing modules found.</div>';
+            return;
+        }
+
+        availableModules.forEach(module => {
+            const card = document.createElement("div");
+            card.className = "module-card";
+
+            const unavailable = !module.available;
+
+            card.innerHTML = `
+                <div class="module-heading">
+                    <input
+                        type="checkbox"
+                        class="module-checkbox"
+                        id="module-${escapeHtml(module.id)}"
+                        value="${escapeHtml(module.id)}"
+                        ${unavailable ? "disabled" : ""}
+                    >
+
+                    <label for="module-${escapeHtml(module.id)}">
+                        <strong>${escapeHtml(module.name)}</strong>
+                        ${unavailable ? " (Unavailable)" : ""}
+                    </label>
+                </div>
+
+                <div class="module-description">
+                    ${escapeHtml(module.description || "")}
+                </div>
+
+                <div
+                    class="module-options"
+                    id="options-${escapeHtml(module.id)}"
+                ></div>
+            `;
+
+            modulesContainer.appendChild(card);
+
+            const checkbox = card.querySelector(".module-checkbox");
+            const optionsContainer = card.querySelector(".module-options");
+
+            checkbox.addEventListener("change", () => {
+                optionsContainer.style.display =
+                    checkbox.checked ? "block" : "none";
+            });
+
+            renderModuleOptions(module, optionsContainer);
+        });
+    }
+
+    function renderModuleOptions(module, container) {
+        const options = module.options || [];
+
+        options.forEach(option => {
+            const field = document.createElement("div");
+            field.className = "field";
+
+            const label = document.createElement("label");
+            label.textContent = option.name;
+
+            let control;
+
+            if (option.type === "select") {
+                control = document.createElement("select");
+
+                (option.choices || []).forEach(choice => {
+                    const item = document.createElement("option");
+                    item.value = choice;
+                    item.textContent = choice;
+                    control.appendChild(item);
+                });
+
+                if (option.default !== null && option.default !== undefined) {
+                    control.value = option.default;
+                }
+
+            } else {
+                control = document.createElement("input");
+                control.type = option.type === "integer" ? "number" : "text";
+
+                if (option.default !== null && option.default !== undefined) {
+                    control.value = option.default;
+                }
+
+                if (option.type === "integer") {
+                    control.step = "1";
+                }
+
+                if (option.name === "quality") {
+                    control.min = "1";
+                    control.max = "100";
+                }
+
+                if (option.name === "width" || option.name === "height") {
+                    control.min = "1";
+                    control.max = "10000";
+                    control.placeholder = "Keep original if empty";
+                }
+            }
+
+            control.dataset.optionName = option.name;
+            control.dataset.optionType = option.type;
+
+            field.appendChild(label);
+            field.appendChild(control);
+
+            if (option.name === "width" || option.name === "height") {
+                const hint = document.createElement("small");
+                hint.textContent = "Leave empty to preserve the original dimension.";
+                field.appendChild(hint);
+            }
+
+            container.appendChild(field);
+        });
+    }
+
+    function collectModuleOptions(module) {
+        const container = document.getElementById(`options-${module.id}`);
+        const options = {};
+
+        container.querySelectorAll("[data-option-name]").forEach(control => {
+            const name = control.dataset.optionName;
+            const type = control.dataset.optionType;
+            const value = control.value.trim();
+
+            if (value === "") {
+                return;
+            }
+
+            options[name] = type === "integer"
+                ? Number(value)
+                : value;
+        });
+
+        return options;
+    }
+
+    function getSelectedModules() {
+        return Array.from(
+            document.querySelectorAll(".module-checkbox:checked")
+        ).map(checkbox => checkbox.value);
+    }
+
+    function validateOptions(moduleIds) {
+        for (const moduleId of moduleIds) {
+            const module = availableModules.find(item => item.id === moduleId);
+
+            if (!module) continue;
+
+            const options = collectModuleOptions(module);
+
+            for (const [name, value] of Object.entries(options)) {
+                if (typeof value === "number" && !Number.isInteger(value)) {
+                    return `${name} must be a whole number.`;
+                }
+
+                if (
+                    name === "quality" &&
+                    (value < 1 || value > 100)
+                ) {
+                    return "Quality must be between 1 and 100.";
+                }
+
+                if (
+                    (name === "width" || name === "height") &&
+                    (value < 1 || value > 10000)
+                ) {
+                    return `${name} must be between 1 and 10,000.`;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    processButton.addEventListener("click", async () => {
+        if (!selectedFile) {
+            alert("Please upload an image first.");
+            return;
+        }
+
+        const moduleIds = getSelectedModules();
+
+        if (!moduleIds.length) {
+            alert("Please select at least one processing module.");
+            return;
+        }
+
+        const validationError = validateOptions(moduleIds);
+
+        if (validationError) {
+            alert(validationError);
+            return;
+        }
+
+        if (pollingTimer) {
+            clearTimeout(pollingTimer);
+            pollingTimer = null;
+        }
+
+        processButton.disabled = true;
+        resultPanel.style.display = "none";
+        emptyResult.style.display = "block";
+
+        showStatus("Uploading image and submitting job...", "info", 5);
+
+        const moduleOptions = {};
+
+        moduleIds.forEach(moduleId => {
+            const module = availableModules.find(
+                item => item.id === moduleId
+            );
+
+            moduleOptions[moduleId] = collectModuleOptions(module);
+        });
+
+        const formData = new FormData();
+
+        formData.append("image", selectedFile);
+        formData.append("module_ids", JSON.stringify(moduleIds));
+        formData.append("module_options", JSON.stringify(moduleOptions));
+
+        try {
+            const response = await fetch(`${API}/process`, {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || "Unable to submit processing job.");
+            }
+
+            showStatus("Image submitted. Processing...", "info", 10);
+            pollJob(data.job_id);
+
+        } catch (error) {
+            showStatus(error.message, "error");
+            processButton.disabled = false;
+        }
+    });
+
+    async function pollJob(jobId) {
+        try {
+            const response = await fetch(`${API}/jobs/${jobId}`);
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || "Unable to retrieve job status.");
+            }
+
+            const job = data.job;
+            const status = job.status;
+            const progress = Number(job.progress) || 0;
+
+            if (status === "completed") {
+                showStatus("Image processing completed successfully.", "success", 100);
+                displayResult(jobId, job);
+                processButton.disabled = false;
+                return;
+            }
+
+            if (status === "failed") {
+                throw new Error(job.error || job.message || "Image processing failed.");
+            }
+
+            const message = job.message ||
+                (status === "queued" ? "Waiting for processing..." : "Processing image...");
+
+            showStatus(message, "info", progress);
+
+            pollingTimer = setTimeout(() => {
+                pollJob(jobId);
+            }, 1000);
+
+        } catch (error) {
+            showStatus(error.message, "error");
+            processButton.disabled = false;
+        }
+    }
+
+    function displayResult(jobId, job) {
+        const previewUrl =
+            `${API}/jobs/${jobId}/preview?t=${Date.now()}`;
+
+        resultImage.src = previewUrl;
+        downloadButton.href =
+            `${API}/jobs/${jobId}/download`;
+
+        const result = job.result || {};
+        const metadata = result.module_results || {};
+
+        resultInfo.textContent = "Your processed image is ready.";
+
+        emptyResult.style.display = "none";
+        resultPanel.style.display = "block";
+    }
+
+    loadModules();
+</script>
+
+</body>
+</html>
